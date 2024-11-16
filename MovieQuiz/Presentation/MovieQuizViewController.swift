@@ -1,9 +1,13 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController {
+    // MARK: - Private properties
+    
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+
     }
 }
 
