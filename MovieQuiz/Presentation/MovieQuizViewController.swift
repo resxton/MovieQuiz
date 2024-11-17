@@ -22,8 +22,8 @@ final class MovieQuizViewController: UIViewController {
     @IBOutlet private weak var imageView: UIImageView!
     @IBOutlet private weak var textLabel: UILabel!
     @IBOutlet private weak var counterLabel: UILabel!
-    @IBOutlet weak var yesButton: UIButton!
-    @IBOutlet weak var noButton: UIButton!
+    @IBOutlet private weak var yesButton: UIButton!
+    @IBOutlet private weak var noButton: UIButton!
     
     
     // MARK: - Lifecycle
@@ -165,21 +165,21 @@ final class MovieQuizViewController: UIViewController {
 
 
 // MARK: - Models
-struct QuizQuestion {
+private struct QuizQuestion {
   let image: String
   let text: String
   let correctAnswer: Bool
 }
 
 
-struct QuizStepViewModel {
+private struct QuizStepViewModel {
   let image: UIImage
   let question: String
   let questionNumber: String
 }
 
 
-struct QuizResultsViewModel {
+private struct QuizResultsViewModel {
   let title: String
   let text: String
   let buttonText: String
