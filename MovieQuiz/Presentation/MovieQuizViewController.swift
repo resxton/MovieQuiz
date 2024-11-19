@@ -17,6 +17,9 @@ final class MovieQuizViewController: UIViewController {
     ]
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
+    private let impact = UIImpactFeedbackGenerator(style: .medium)
+    private let generator = UINotificationFeedbackGenerator()
+    private let lightImpact = UIImpactFeedbackGenerator(style: .light)
     
     // MARK: - IB Outlets
     @IBOutlet private weak var imageView: UIImageView!
@@ -24,7 +27,6 @@ final class MovieQuizViewController: UIViewController {
     @IBOutlet private weak var counterLabel: UILabel!
     @IBOutlet private weak var yesButton: UIButton!
     @IBOutlet private weak var noButton: UIButton!
-    
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -34,33 +36,32 @@ final class MovieQuizViewController: UIViewController {
         show(quiz: convert(model: currentQuestion))
     }
     
-    
     // MARK: - IB Actions
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        let isCorrect = (questions[currentQuestionIndex].correctAnswer == false)
+        let isCorrect = questions[currentQuestionIndex].correctAnswer == false
         showAnswerResult(isCorrect: isCorrect)
     }
-    
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        let isCorrect = (questions[currentQuestionIndex].correctAnswer == true)
+        let isCorrect = questions[currentQuestionIndex].correctAnswer == true
         showAnswerResult(isCorrect: isCorrect)
     }
-    
     
     // MARK: - Private methods
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        return QuizStepViewModel(image: UIImage(named: model.image) ?? UIImage(), question: model.text, questionNumber: "\(currentQuestionIndex+1)/\(questions.count)")
+        .init(
+            image: UIImage(named: model.image) ?? UIImage(),
+            question: model.text,
+            questionNumber: "\(currentQuestionIndex+1)/\(questions.count)"
+        )
     }
-    
     
     private func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
-        enableButtons()
+        setButtonsEnabled(true)
     }
-    
     
     private func showAnswerResult(isCorrect: Bool) {
         imageView.layer.borderWidth = 8
@@ -75,7 +76,7 @@ final class MovieQuizViewController: UIViewController {
             wrongAnswerFeedback()
         }
         
-        disableButtons()
+        setButtonsEnabled(false)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.hideResult()
@@ -83,27 +84,18 @@ final class MovieQuizViewController: UIViewController {
         }
     }
     
-    
     private func hideResult() {
         imageView.layer.borderColor = UIColor.clear.cgColor
     }
     
-    
-    private func enableButtons() {
-        yesButton.isEnabled = true
-        noButton.isEnabled = true
+    private func setButtonsEnabled(_ isEnabled: Bool) {
+        yesButton.isEnabled = isEnabled
+        noButton.isEnabled = isEnabled
     }
-    
-    
-    private func disableButtons() {
-        yesButton.isEnabled = false
-        noButton.isEnabled = false
-    }
-    
     
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questions.count - 1 {
-            show(quiz: QuizResultsViewModel(title: "Этот раунд окончен!", text: "Ваш результат \(correctAnswers)/\(questions.count)", buttonText: "Начать заново"))
+            show(quiz: QuizResultsViewModel(title: "Раунд окончен!", text: "Ваш результат: \(correctAnswers)/\(questions.count)", buttonText: "Сыграть еще раз"))
         } else {
             currentQuestionIndex += 1
             
@@ -114,13 +106,12 @@ final class MovieQuizViewController: UIViewController {
         }
     }
     
-
     private func show(quiz result: QuizResultsViewModel) {
         let alert = UIAlertController(
             title: result.title,
             message: result.text,
             preferredStyle: .alert)
-
+        
         let action = UIAlertAction(title: result.buttonText, style: .default) { _ in
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
@@ -129,58 +120,50 @@ final class MovieQuizViewController: UIViewController {
             let viewModel = self.convert(model: firstQuestion)
             self.show(quiz: viewModel)
         }
-
+        
         alert.addAction(action)
-
+        
         self.present(alert, animated: true, completion: nil)
     }
     
-    
     private func correctAnswerFeedback() {
-        let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
         
-        let impact = UIImpactFeedbackGenerator(style: .light)
-        impact.impactOccurred()
+        lightImpact.impactOccurred()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            impact.impactOccurred(intensity: 0.7)
+            self.lightImpact.impactOccurred(intensity: 0.7)
         }
     }
     
-    
     private func wrongAnswerFeedback() {
-        let impact = UIImpactFeedbackGenerator(style: .medium)
         impact.impactOccurred()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            impact.impactOccurred(intensity: 0.5)
+            self.impact.impactOccurred(intensity: 0.5)
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            impact.impactOccurred(intensity: 1.0)
+            self.impact.impactOccurred(intensity: 1.0)
         }
     }
 }
 
-
 // MARK: - Models
 private struct QuizQuestion {
-  let image: String
-  let text: String
-  let correctAnswer: Bool
+    let image: String
+    let text: String
+    let correctAnswer: Bool
 }
-
 
 private struct QuizStepViewModel {
-  let image: UIImage
-  let question: String
-  let questionNumber: String
+    let image: UIImage
+    let question: String
+    let questionNumber: String
 }
 
-
 private struct QuizResultsViewModel {
-  let title: String
-  let text: String
-  let buttonText: String
+    let title: String
+    let text: String
+    let buttonText: String
 }
