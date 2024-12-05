@@ -111,6 +111,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
                 questionFactory?.requestNextQuestion()
             }))
         } else {
+            currentQuestionIndex += 1
             questionFactory?.requestNextQuestion()
         }
     }
