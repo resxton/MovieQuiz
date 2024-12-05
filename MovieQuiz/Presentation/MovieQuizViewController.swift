@@ -1,7 +1,7 @@
 import UIKit
 
 
-final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
+final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, AlertPresenterDelegate {
     // MARK: - Private properties
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
@@ -11,6 +11,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
+    private var alertPresenter: AlertPresenter?
     
     // MARK: - IB Outlets
     @IBOutlet private weak var imageView: UIImageView!
@@ -27,8 +28,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         questionFactory.setDelegate(self)
         self.questionFactory = questionFactory
         
+        let alertPresenter = AlertPresenter()
+        alertPresenter.setDelegate(self)
+        self.alertPresenter = alertPresenter
+        
         questionFactory.requestNextQuestion()
- 
     }
     
     // MARK: - IB Actions
@@ -99,30 +103,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             let text = correctAnswers == questionsAmount ?
                     "Поздравляем, вы ответили на 10 из 10!" :
                     "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
-            show(quiz: QuizResultsViewModel(title: "Раунд окончен!", text: text, buttonText: "Сыграть еще раз"))
+            alertPresenter?.showAlert(from: AlertModel(title: "Раунд окончен!", message: text, buttonText: "Сыграть еще раз", completion: { [weak self] in
+                guard let self = self else { return }
+                self.currentQuestionIndex = 0
+                self.correctAnswers = 0
+                
+                questionFactory?.requestNextQuestion()
+            }))
         } else {
             questionFactory?.requestNextQuestion()
         }
     }
-    
-    private func show(quiz result: QuizResultsViewModel) {
-        let alert = UIAlertController(
-            title: result.title,
-            message: result.text,
-            preferredStyle: .alert)
-        
-        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
-            guard let self = self else { return }
-            self.currentQuestionIndex = 0
-            self.correctAnswers = 0
-            
-            questionFactory?.requestNextQuestion()
-        }
-        
-        alert.addAction(action)
-        
-        self.present(alert, animated: true, completion: nil)
-    }
+
     
     private func correctAnswerFeedback() {
         generator.notificationOccurred(.success)
@@ -149,6 +141,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
     
+    // MARK: - QuestionFactoryDelegate
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else {
             return
@@ -159,5 +152,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)
         }
+    }
+    
+    // MARK: - AlertPresenterDelegate
+    func didReceiveAlert(alert: UIAlertController) {
+        self.present(alert, animated: true)
     }
 }

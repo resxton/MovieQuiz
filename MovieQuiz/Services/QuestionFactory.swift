@@ -5,7 +5,7 @@
 //  Created by Сомов Кирилл on 22.11.2024.
 //
 
-import Foundation
+import UIKit
 
 class QuestionFactory: QuestionFactoryProtocol {
     // MARK: - Private properties
