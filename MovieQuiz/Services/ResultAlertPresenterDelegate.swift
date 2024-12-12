@@ -7,6 +7,6 @@
 
 import UIKit
 
-protocol AlertPresenterDelegate: AnyObject {
+protocol ResultAlertPresenterDelegate: AnyObject {
     func didReceiveAlert(alert: UIAlertController)
 }

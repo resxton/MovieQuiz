@@ -1,7 +1,7 @@
 import UIKit
 
 
-final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, AlertPresenterDelegate {
+final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, ResultAlertPresenterDelegate {
     // MARK: - Private properties
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
@@ -11,7 +11,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
-    private var alertPresenter: AlertPresenter?
+    private var alertPresenter: ResultAlertPresenterProtocol?
+    private var statisticService: StatisticService = StatisticServiceImplementation()
     
     // MARK: - IB Outlets
     @IBOutlet private weak var imageView: UIImageView!
@@ -28,7 +29,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         questionFactory.setDelegate(self)
         self.questionFactory = questionFactory
         
-        let alertPresenter = AlertPresenter()
+        let alertPresenter = ResultAlertPresenter()
         alertPresenter.setDelegate(self)
         self.alertPresenter = alertPresenter
         
@@ -68,6 +69,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         setButtonsEnabled(true)
     }
     
+    private func show(quiz result: QuizResultsViewModel) {
+        alertPresenter?.showAlert(from: ResultAlertModel(title: result.title, message: result.text, buttonText: result.buttonText, completion: { [weak self] in
+            guard let self = self else { return }
+            currentQuestionIndex = 0
+            correctAnswers = 0
+            
+            questionFactory?.requestNextQuestion()
+        }))
+    }
+    
     private func showAnswerResult(isCorrect: Bool) {
         imageView.layer.borderWidth = 8
         imageView.layer.masksToBounds = true
@@ -83,9 +94,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         
         setButtonsEnabled(false)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { #warning("Set back to 1.0")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.hideResult()
-            self.showNextQuestionOrResults()
+            self.showNextQuestion()
         }
     }
     
@@ -98,25 +109,26 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         noButton.isEnabled = isEnabled
     }
     
-    private func showNextQuestionOrResults() {
+    private func showNextQuestion() {
         if currentQuestionIndex == questionsAmount - 1 {
-            let text = correctAnswers == questionsAmount ?
-                    "Поздравляем, вы ответили на 10 из 10!" :
-                    "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
-            alertPresenter?.showAlert(from: AlertModel(title: "Раунд окончен!", message: text, buttonText: "Сыграть еще раз", completion: { [weak self] in
-                guard let self = self else { return }
-                self.currentQuestionIndex = 0
-                self.correctAnswers = 0
-                
-                questionFactory?.requestNextQuestion()
-            }))
+            statisticService.store(correct: correctAnswers, total: questionsAmount, date: Date())
+            
+            let text = """
+            Ваш результат: \(correctAnswers)/10
+            Количество сыгранных квизов: \(statisticService.gamesCount)
+            Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.date.dateTimeString))
+            Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
+            """
+            
+            let quizResults = QuizResultsViewModel(title: "Этот раунд окончен!", text: text, buttonText: "Сыграть еще раз")
+            
+            show(quiz: quizResults)
         } else {
             currentQuestionIndex += 1
             questionFactory?.requestNextQuestion()
         }
     }
 
-    
     private func correctAnswerFeedback() {
         generator.notificationOccurred(.success)
         

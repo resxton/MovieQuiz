@@ -7,6 +7,6 @@
 
 import UIKit
 
-protocol AlertPresenterProtocol {
-    func showAlert(from model: AlertModel)
+protocol ResultAlertPresenterProtocol {
+    func showAlert(from model: ResultAlertModel)
 }
