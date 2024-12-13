@@ -94,7 +94,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         
         setButtonsEnabled(false)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self = self else { return }
             self.hideResult()
             self.showNextQuestion()
         }
@@ -170,5 +171,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     // MARK: - AlertPresenterDelegate
     func didReceiveAlert(alert: UIAlertController) {
         self.present(alert, animated: true)
+    }
+    
+    // MARK: - Overrides
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
     }
 }
