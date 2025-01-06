@@ -95,7 +95,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         
         setButtonsEnabled(false)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self = self else { return }
             self.hideResult()
             self.changeAppearingOfLoadingIndicator(to: true)
             self.showNextQuestion()
@@ -130,7 +131,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
             questionFactory?.requestNextQuestion()
         }
     }
-
+    
     private func correctAnswerFeedback() {
         generator.notificationOccurred(.success)
         
@@ -191,22 +192,28 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         currentQuestion = question
         let viewModel = convert(model: question)
         DispatchQueue.main.async { [weak self] in
-            self?.show(quiz: viewModel)
+            guard let self = self else { return }
+            self.show(quiz: viewModel)
         }
     }
     
     func didLoadDataFromServer() {
         questionFactory?.requestNextQuestion()
     }
-
+    
     func didFailToLoadData(with error: Error) {
         changeAppearingOfLoadingIndicator(to: false)
-
+        
         showNetworkError(message: error.localizedDescription)
     }
     
     // MARK: - AlertPresenterDelegate
     func didReceiveAlert(alert: UIAlertController) {
         self.present(alert, animated: true)
+    }
+    
+    // MARK: - Overrides
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
     }
 }
