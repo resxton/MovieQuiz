@@ -33,7 +33,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         alertPresenter.setDelegate(self)
         self.alertPresenter = alertPresenter
         
-        showLoadingIndicator()
+        changeAppearingOfLoadingIndicator(to: true)
         questionFactory.loadData()
     }
     
@@ -97,7 +97,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.hideResult()
-            self.showLoadingIndicator()
+            self.changeAppearingOfLoadingIndicator(to: true)
             self.showNextQuestion()
         }
     }
@@ -156,20 +156,17 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         }
     }
     
-    private func showLoadingIndicator() {
-        print("show indicator")
-        activityIndicator.isHidden = false
-        activityIndicator.startAnimating()
-    }
-    
-    private func hideLoadingIndicator() {
-        print("hide indicator")
-        activityIndicator.isHidden = true
-        activityIndicator.stopAnimating()
+    private func changeAppearingOfLoadingIndicator(to status: Bool) {
+        activityIndicator.isHidden = !status
+        if status {
+            activityIndicator.startAnimating()
+        } else {
+            activityIndicator.stopAnimating()
+        }
     }
     
     private func showNetworkError(message: String) {
-        hideLoadingIndicator()
+        changeAppearingOfLoadingIndicator(to: false)
         
         let alertModel = ResultAlertModel(title: "Ошибка", message: message, buttonText: "Попробовать еще раз") { [weak self] in
             guard let self = self else { return }
@@ -189,7 +186,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
             return
         }
         
-        hideLoadingIndicator()
+        changeAppearingOfLoadingIndicator(to: false)
+        
         currentQuestion = question
         let viewModel = convert(model: question)
         DispatchQueue.main.async { [weak self] in
@@ -202,7 +200,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     }
 
     func didFailToLoadData(with error: Error) {
-        hideLoadingIndicator()
+        changeAppearingOfLoadingIndicator(to: false)
+
         showNetworkError(message: error.localizedDescription)
     }
     
