@@ -31,7 +31,7 @@ class QuestionFactory: QuestionFactoryProtocol {
         self.moviesLoader = moviesLoader
     }
     
-    // MARK: - Private methods
+    // MARK: - Methods
     func requestNextQuestion() {
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
