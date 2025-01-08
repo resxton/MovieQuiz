@@ -113,6 +113,22 @@
                                     </stackView>
                                 </subviews>
                             </stackView>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="3I3-Ts-TT9">
+                                <rect key="frame" x="151" y="387" width="100" height="100"/>
+                                <color key="backgroundColor">
+                                    <string key="name">YP Black
+</string>
+                                </color>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="100" id="Hj1-SB-n4A"/>
+                                    <constraint firstAttribute="width" constant="100" id="z0S-Rn-jmY"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="20"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor">
@@ -120,13 +136,16 @@
 </string>
                         </color>
                         <constraints>
+                            <constraint firstItem="3I3-Ts-TT9" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="1HS-mg-myh"/>
                             <constraint firstItem="JBr-PF-66G" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="AIT-Du-Dzi"/>
+                            <constraint firstItem="3I3-Ts-TT9" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Mca-Xa-ptf"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="JBr-PF-66G" secondAttribute="trailing" constant="20" id="VHm-4A-raI"/>
                             <constraint firstItem="JBr-PF-66G" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="10" id="lP1-Bs-abK"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="JBr-PF-66G" secondAttribute="bottom" id="s9N-SA-oOi"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="activityIndicator" destination="3I3-Ts-TT9" id="zqx-RC-11t"/>
                         <outlet property="counterLabel" destination="NPe-qN-cX7" id="lk7-cZ-nMe"/>
                         <outlet property="imageView" destination="pzb-BZ-DbE" id="pIN-bp-HIh"/>
                         <outlet property="noButton" destination="faq-XD-deQ" id="70I-jz-uYW"/>
