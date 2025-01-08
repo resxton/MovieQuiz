@@ -7,12 +7,12 @@
 
 import UIKit
 
-class ResultAlertPresenter: ResultAlertPresenterProtocol {
+final class AlertPresenter: AlertPresenterProtocol {
     // MARK: - Properties
-    private weak var delegate : ResultAlertPresenterDelegate?
+    private weak var delegate: AlertPresenterDelegate?
     
     // MARK: - Methods
-    func showAlert(from model: ResultAlertModel) {
+    func showAlert(from model: AlertModel) {
         let alert = UIAlertController(title: model.title, message: model.message, preferredStyle: .alert)
         let action = UIAlertAction(title: model.buttonText, style: .default) { _ in
             model.completion()
@@ -22,7 +22,7 @@ class ResultAlertPresenter: ResultAlertPresenterProtocol {
         self.delegate?.didReceiveAlert(alert: alert)
     }
     
-    func setDelegate(_ delegate: ResultAlertPresenterDelegate) {
+    init(delegate: AlertPresenterDelegate? = nil) {
         self.delegate = delegate
     }
 }
