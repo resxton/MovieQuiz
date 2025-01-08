@@ -91,7 +91,7 @@ final class MovieQuizViewController: UIViewController,
         
         setButtonsEnabled(false)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in 
             guard let self else { return }
             self.hideResult()
             self.changeAppearingOfLoadingIndicator(to: true)
@@ -196,10 +196,10 @@ final class MovieQuizViewController: UIViewController,
         showNetworkError(message: error.localizedDescription)
     }
     
-    func didFailToLoadData() {
+    func didFailToLoadData(with message: String) {
         changeAppearingOfLoadingIndicator(to: false)
         
-        showNetworkError(message: "Получен пустой список фильмов")
+        showNetworkError(message: message)
     }
     
     func didFailToLoadImage() {

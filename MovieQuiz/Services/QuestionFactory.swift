@@ -94,7 +94,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
                 switch result {
                 case .success(let MostPopularMovies):
                     guard MostPopularMovies.items.count > 0 else {
-                        self.delegate?.didFailToLoadData()
+                        self.delegate?.didFailToLoadData(with: MostPopularMovies.errorMessage)
                         return
                     }
                     self.movies = MostPopularMovies.items
