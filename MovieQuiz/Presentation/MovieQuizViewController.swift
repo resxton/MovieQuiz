@@ -102,10 +102,6 @@ final class MovieQuizViewController: UIViewController,
         noButton.isEnabled = isEnabled
     }
     
-    private func showNextQuestionOrResult() {
-        presenter.showNextQuestionOrResult()
-    }
-    
     private func correctAnswerFeedback() {
         notificationLikeImpact.notificationOccurred(.success)
         
