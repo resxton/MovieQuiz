@@ -25,12 +25,6 @@ final class MovieQuizUITests: XCTestCase {
         app.terminate()
         app = nil
     }
-
-    @MainActor
-    func testExample() throws {
-        let app = XCUIApplication()
-        app.launch()
-    }
     
     func testYesButton() throws {
         sleep(3)

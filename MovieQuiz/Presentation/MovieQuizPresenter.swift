@@ -7,22 +7,24 @@
 
 import UIKit
 
-final class MovieQuizPresenter: QuestionFactoryDelegate {    
-    // MARK: - Public Properties
-    let questionsAmount: Int = 10
-    var currentQuestion: QuizQuestion?
-    var correctAnswers = 0
-    var statisticService: StatisticService = StatisticServiceImplementation()
+final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     // MARK: - Private Properties
+    private let questionsAmount: Int = 10
+    private var currentQuestion: QuizQuestion?
+    private var correctAnswers = 0
     private var currentQuestionIndex: Int = 0
     private var questionFactory: QuestionFactoryProtocol?
-    private weak var viewController: MovieQuizViewController?
+    private weak var viewController: MovieQuizViewControllerProtocol?
+    private var statisticService: StatisticService
+    private var alertPresenter: AlertPresenterProtocol
     
     // MARK: - Initializers
-    init(viewController: MovieQuizViewController) {
+    init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
         
+        alertPresenter = AlertPresenter()
+        statisticService = StatisticServiceImplementation()
         questionFactory = QuestionFactory(delegate: self, moviesLoader: MoviesLoader())
         questionFactory?.loadData()
         viewController.changeAppearanceOfLoadingIndicator(to: true)
@@ -68,14 +70,8 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     func showNextQuestionOrResult() {
         if self.isLastQuestion() {
             guard let viewController else { return }
-            statisticService.store(correct: self.correctAnswers, total: self.questionsAmount, date: Date())
             
-            let text = """
-            Ваш результат: \(correctAnswers)/10
-            Количество сыгранных квизов: \(statisticService.gamesCount)
-            Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.date.dateTimeString))
-            Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
-            """
+            let text = makeResultsMessage()
             
             let quizResults = QuizResultsViewModel(title: "Этот раунд окончен!",
                                                    text: text,
@@ -94,11 +90,37 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         }
     }
     
+    func showAnswerResult(isCorrect: Bool) {
+        didAnswer(isCorrectAnswer: isCorrect)
+        
+        viewController?.highlightImageBorder(isCorrectAnswer: isCorrect)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self else { return }
+            showNextQuestionOrResult()
+        }
+    }
+    
     // MARK: - Private Methods
     private func didAnswer(isYes: Bool) {
         guard let currentQuestion else { return }
         let givenAnswer = isYes
-        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+    }
+    
+    private func makeResultsMessage() -> String {
+        statisticService.store(correct: self.correctAnswers, total: self.questionsAmount, date: Date())
+        
+        let currentGameResultLine = "Ваш результат: \(correctAnswers)/\(questionsAmount)"
+        let totalPlaysCountLine = "Количество сыгранных квизов: \(statisticService.gamesCount)"
+        let bestGameInfoLine = "Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.date.dateTimeString))"
+        let averageAccuracyLine = "Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
+        
+        let resultMessage = [
+                    currentGameResultLine, totalPlaysCountLine, bestGameInfoLine, averageAccuracyLine
+                ].joined(separator: "\n")
+        
+        return resultMessage
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -129,19 +151,5 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     func didFailToLoadData(with message: String) {
         viewController?.changeAppearanceOfLoadingIndicator(to: false)
         viewController?.showNetworkError(message: message)
-    }
-    
-    func didFailToLoadImage() {
-        viewController?.changeAppearanceOfLoadingIndicator(to: false)
-        
-        let loadFailAlertModel = AlertModel(title: "Ошибка",
-                                            message: "Возникла проблема с загрузкой картинки",
-                                            buttonText: "Начать заново") { [weak self] in
-            guard let self else { return }
-            reloadGame()
-            questionFactory?.requestNextQuestion()
-        }
-        
-        viewController?.alertPresenter?.showAlert(in: viewController ?? MovieQuizViewController(), from: loadFailAlertModel)
     }
 }

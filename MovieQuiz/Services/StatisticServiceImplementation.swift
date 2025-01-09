@@ -8,6 +8,8 @@
 import Foundation
 
 final class StatisticServiceImplementation: StatisticService {
+    
+    // MARK: - Private Properties
     private let storage: UserDefaults = .standard
     
     private enum Keys: String {
@@ -20,6 +22,7 @@ final class StatisticServiceImplementation: StatisticService {
         case date
     }
     
+    // MARK: - Public Properties
     var correct: Int {
         get {
             storage.integer(forKey: Keys.correct.rawValue)
@@ -74,7 +77,8 @@ final class StatisticServiceImplementation: StatisticService {
         guard totalQuestions > 0 else { return 0.0 }
         return (Double(totalCorrect) / Double(totalQuestions)) * 100.0
     }
-
+    
+    // MARK: - Public Methods
     func store(correct count: Int, total amount: Int, date: Date) {
         let currentResult = GameResult(correct: count, total: amount, date: date)
         bestGame = bestGame.compareResult(with: currentResult)

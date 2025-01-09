@@ -11,20 +11,14 @@ import XCTest
 
 struct StubNetworkClient: NetworkRouting {
     
-    enum TestError: Error { // тестовая ошибка
-    case test
+    // MARK: - Public Properties
+    enum TestError: Error {
+        case test
     }
     
-    let emulateError: Bool // этот параметр нужен, чтобы заглушка эмулировала либо ошибку сети, либо успешный ответ
+    let emulateError: Bool
     
-    func fetch(url: URL, handler: @escaping (Result<Data, Error>) -> Void) {
-        if emulateError {
-            handler(.failure(TestError.test))
-        } else {
-            handler(.success(expectedResponse))
-        }
-    }
-    
+    // MARK: - Private Properties
     private var expectedResponse: Data {
         """
         {
@@ -57,6 +51,15 @@ struct StubNetworkClient: NetworkRouting {
             ]
           }
         """.data(using: .utf8) ?? Data()
+    }
+    
+    // MARK: - Public Methods
+    func fetch(url: URL, handler: @escaping (Result<Data, Error>) -> Void) {
+        if emulateError {
+            handler(.failure(TestError.test))
+        } else {
+            handler(.success(expectedResponse))
+        }
     }
 }
 
