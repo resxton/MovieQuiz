@@ -9,6 +9,8 @@ import XCTest
 
 final class MovieQuizUITests: XCTestCase {
     var app: XCUIApplication!
+    // Change sleepTime if you need longer latency in tests (with my network 1s works just fine)
+    let sleepTime: UInt32 = 1
 
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -62,11 +64,11 @@ final class MovieQuizUITests: XCTestCase {
     
     func testResultAlert() throws {
         let button = app.buttons["Yes"]
-        sleep(1)
+        sleep(sleepTime)
         
         for _ in 0..<10 {
             button.tap()
-            sleep(1)
+            sleep(sleepTime)
         }
         
         let resultAlert = app.alerts["Alert"]
@@ -77,11 +79,11 @@ final class MovieQuizUITests: XCTestCase {
     
     func testResultAlertDismiss() throws {
         let button = app.buttons["Yes"]
-        sleep(1)
+        sleep(sleepTime)
         
         for _ in 0..<10 {
             button.tap()
-            sleep(1)
+            sleep(sleepTime)
         }
         
         let resultAlert = app.alerts["Alert"]
@@ -90,7 +92,7 @@ final class MovieQuizUITests: XCTestCase {
         XCTAssertEqual(alertButton.label, "Сыграть еще раз", "Неверный текст кнопки")
         alertButton.tap()
         
-        sleep(1)
+        sleep(sleepTime)
         
         let indexLabel = app.staticTexts["Index"]
         XCTAssertEqual(indexLabel.label, "1/10")
