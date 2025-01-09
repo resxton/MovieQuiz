@@ -2,8 +2,7 @@ import UIKit
 
 
 final class MovieQuizViewController: UIViewController,
-                                     QuestionFactoryDelegate,
-                                     AlertPresenterDelegate {
+                                     QuestionFactoryDelegate {
     // MARK: - Private properties
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
@@ -30,7 +29,7 @@ final class MovieQuizViewController: UIViewController,
         
         questionFactory = QuestionFactory(delegate: self, moviesLoader: MoviesLoader())
         
-        alertPresenter = AlertPresenter(delegate: self)
+        alertPresenter = AlertPresenter()
         
         changeAppearingOfLoadingIndicator(to: true)
         
@@ -67,7 +66,7 @@ final class MovieQuizViewController: UIViewController,
     }
     
     private func show(quiz result: QuizResultsViewModel) {
-        alertPresenter?.showAlert(from: AlertModel(title: result.title, message: result.text, buttonText: result.buttonText, completion: { [weak self] in
+        alertPresenter?.showAlert(in: self, from: AlertModel(title: result.title, message: result.text, buttonText: result.buttonText, completion: { [weak self] in
             guard let self else { return }
             currentQuestionIndex = 0
             correctAnswers = 0
@@ -166,10 +165,10 @@ final class MovieQuizViewController: UIViewController,
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
             
-            self.questionFactory?.requestNextQuestion()
+            self.questionFactory?.loadData()
         }
         
-        alertPresenter?.showAlert(from: alertModel)
+        alertPresenter?.showAlert(in: self, from: alertModel)
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -213,12 +212,7 @@ final class MovieQuizViewController: UIViewController,
                 questionFactory?.requestNextQuestion()
         }
         
-        alertPresenter?.showAlert(from: loadFailAlertModel)
-    }
-    
-    // MARK: - AlertPresenterDelegate
-    func didReceiveAlert(alert: UIAlertController) {
-        self.present(alert, animated: true)
+        alertPresenter?.showAlert(in: self, from: loadFailAlertModel)
     }
     
     // MARK: - Overrides
