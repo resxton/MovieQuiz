@@ -26,6 +26,8 @@ final class MovieQuizViewController: UIViewController,
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        presenter.viewController = self
+        
         questionFactory = QuestionFactory(delegate: self, moviesLoader: MoviesLoader())
         
         alertPresenter = AlertPresenter()
@@ -37,15 +39,37 @@ final class MovieQuizViewController: UIViewController,
     
     // MARK: - IB Actions
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion else { return }
-        let givenAnswer = false
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        presenter.currentQuestion = currentQuestion
+        presenter.noButtonClicked()
     }
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else { return }
-        let givenAnswer = true
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        presenter.currentQuestion = currentQuestion
+        presenter.yesButtonClicked()
+    }
+    
+    // MARK: - Public Methods
+    func showAnswerResult(isCorrect: Bool) {
+        imageView.layer.borderWidth = 8
+        imageView.layer.masksToBounds = true
+        
+        if isCorrect == true {
+            imageView.layer.borderColor = UIColor.ypGreen.cgColor
+            correctAnswerFeedback()
+            correctAnswers += 1
+        } else {
+            imageView.layer.borderColor = UIColor.ypRed.cgColor
+            wrongAnswerFeedback()
+        }
+        
+        setButtonsEnabled(false)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self else { return }
+            self.hideResult()
+            self.changeAppearanceOfLoadingIndicator(to: true)
+            self.showNextQuestionOrResult()
+        }
     }
     
     // MARK: - Private methods
@@ -64,29 +88,6 @@ final class MovieQuizViewController: UIViewController,
             
             questionFactory?.requestNextQuestion()
         }))
-    }
-    
-    private func showAnswerResult(isCorrect: Bool) {
-        imageView.layer.borderWidth = 8
-        imageView.layer.masksToBounds = true
-        
-        if isCorrect == true {
-            imageView.layer.borderColor = UIColor.ypGreen.cgColor
-            correctAnswerFeedback()
-            correctAnswers += 1
-        } else {
-            imageView.layer.borderColor = UIColor.ypRed.cgColor
-            wrongAnswerFeedback()
-        }
-        
-        setButtonsEnabled(false)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in 
-            guard let self else { return }
-            self.hideResult()
-            self.changeAppearanceOfLoadingIndicator(to: true)
-            self.showNextQuestionOrResult()
-        }
     }
     
     private func hideResult() {
