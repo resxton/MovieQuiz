@@ -8,21 +8,18 @@
 import UIKit
 
 final class AlertPresenter: AlertPresenterProtocol {
-    // MARK: - Properties
-    private weak var delegate: AlertPresenterDelegate?
     
-    // MARK: - Methods
-    func showAlert(from model: AlertModel) {
+    // MARK: - Public Methods
+    func showAlert(in vc: UIViewController, from model: AlertModel) {
         let alert = UIAlertController(title: model.title, message: model.message, preferredStyle: .alert)
+        alert.view.accessibilityIdentifier = "Alert"
+        
         let action = UIAlertAction(title: model.buttonText, style: .default) { _ in
             model.completion()
         }
         
         alert.addAction(action)
-        self.delegate?.didReceiveAlert(alert: alert)
-    }
-    
-    init(delegate: AlertPresenterDelegate? = nil) {
-        self.delegate = delegate
+        
+        vc.present(alert, animated: true)
     }
 }

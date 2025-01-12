@@ -8,6 +8,8 @@
 import UIKit
 
 protocol StatisticService {
+    
+    // MARK: - Public Properties
     var gamesCount: Int { get }
     var bestGame: GameResult { get }
     var totalAccuracy: Double { get }
@@ -15,5 +17,6 @@ protocol StatisticService {
     var totalCorrect: Int { get }
     var totalQuestions: Int { get }
     
+    // MARK: - Public Methods
     func store(correct count: Int, total amount: Int, date: Date)
 }

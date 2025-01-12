@@ -8,18 +8,19 @@
 import UIKit
 
 final class QuestionFactory: QuestionFactoryProtocol {
+    
     // MARK: - Private properties
     private var movies: [MostPopularMovie] = []
     private weak var delegate: QuestionFactoryDelegate?
     private let moviesLoader: MoviesLoading
     
-    // MARK: - init
+    // MARK: - Initializers
     init(delegate: QuestionFactoryDelegate?, moviesLoader: MoviesLoading) {
         self.delegate = delegate
         self.moviesLoader = moviesLoader
     }
     
-    // MARK: - Methods
+    // MARK: - Public Methods
     func requestNextQuestion() {
         DispatchQueue.global().async { [weak self] in
             guard let self else { return }
@@ -34,7 +35,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
             } catch {
                 DispatchQueue.main.async { [weak self] in
                     guard let self else { return }
-                    self.delegate?.didFailToLoadImage()
+                    self.delegate?.didFailToLoadData(with: "Image loading error")
                 }
             }
             
@@ -94,7 +95,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
                 switch result {
                 case .success(let MostPopularMovies):
                     guard MostPopularMovies.items.count > 0 else {
-                        self.delegate?.didFailToLoadData()
+                        self.delegate?.didFailToLoadData(with: MostPopularMovies.errorMessage)
                         return
                     }
                     self.movies = MostPopularMovies.items
