@@ -71,8 +71,11 @@ final class MovieQuizUITests: XCTestCase {
             sleep(sleepTime)
         }
         
+        sleep(1)
+        
         let resultAlert = app.alerts["Alert"]
         XCTAssertTrue(resultAlert.exists, "Алерт не существует")
+        XCTAssertEqual(resultAlert.label, "Этот раунд окончен!", "Ошибка в заголовке алерта")
         let alertButton = resultAlert.buttons.firstMatch
         XCTAssertEqual(alertButton.label, "Сыграть еще раз", "Неверный текст кнопки")
     }
@@ -86,6 +89,8 @@ final class MovieQuizUITests: XCTestCase {
             sleep(sleepTime)
         }
         
+        sleep(1)
+        
         let resultAlert = app.alerts["Alert"]
         XCTAssertTrue(resultAlert.exists, "Алерт не существует")
         let alertButton = resultAlert.buttons.firstMatch
@@ -93,6 +98,9 @@ final class MovieQuizUITests: XCTestCase {
         alertButton.tap()
         
         sleep(sleepTime)
+        
+        let hiddenAlert = app.alerts["Alert"]
+        XCTAssertFalse(hiddenAlert.exists, "Алерт все еще существует")
         
         let indexLabel = app.staticTexts["Index"]
         XCTAssertEqual(indexLabel.label, "1/10")
